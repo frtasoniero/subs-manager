@@ -1,4 +1,4 @@
-.PHONY: docker-cleanup docker-cleanup-all db-up db-down db-restart db-logs db-ps db-clean db-reset db-build db-shell api-run api-deps api-init-db api-setup
+.PHONY: docker-cleanup docker-cleanup-all db-up db-down db-restart db-logs db-ps db-clean db-reset db-build db-shell api-run api-deps api-init-db api-clean-db api-setup
 
 # Docker general cleanup
 docker-cleanup:
@@ -51,6 +51,9 @@ api-deps:
 
 api-init-db:
 	cd api && go run cli/main.go init-db
+
+api-clean-db:
+	cd api && go run cli/main.go clean-db
 
 api-setup:
 	@echo "🔧 Setting up development environment..."
