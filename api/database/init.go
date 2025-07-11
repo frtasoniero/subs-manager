@@ -53,6 +53,120 @@ func InitializeDatabase() error {
 	return nil
 }
 
+// CleanDatabase removes all data from collections and reinitializes with default data
+func CleanDatabase() error {
+	// MongoDB connection string
+	uri := "mongodb://root:password@localhost:27017"
+
+	// Create client
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		return fmt.Errorf("failed to connect to MongoDB: %w", err)
+	}
+	defer client.Disconnect(context.TODO())
+
+	// Test connection
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to ping MongoDB: %w", err)
+	}
+
+	// Get database
+	db := client.Database("subs-db")
+
+	// Clean all collections
+	fmt.Println("🧹 Cleaning database...")
+
+	// Delete all data from collections
+	collections := []string{"subscriptions", "users", "products"}
+	for _, collectionName := range collections {
+		collection := db.Collection(collectionName)
+		result, err := collection.DeleteMany(ctx, map[string]any{})
+		if err != nil {
+			return fmt.Errorf("failed to clean %s collection: %w", collectionName, err)
+		}
+		fmt.Printf("🗑️  Removed %d documents from %s collection\n", result.DeletedCount, collectionName)
+	}
+
+	// Re-initialize with default data
+	fmt.Println("🔄 Re-initializing with default data...")
+
+	productIDs, err := initializeProductsForce(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	userIDs, err := initializeUsersForce(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	if err := initializeSubscriptionsForce(ctx, db, userIDs, productIDs); err != nil {
+		return err
+	}
+
+	fmt.Println("✅ Database cleaned and reset to default data!")
+	return nil
+}
+
+// Force initialization functions (skip count check)
+func initializeProductsForce(ctx context.Context, db *mongo.Database) ([]primitive.ObjectID, error) {
+	collection := db.Collection("products")
+
+	// Insert sample products
+	sampleProducts := GetSampleProducts()
+	result, err := collection.InsertMany(ctx, sampleProducts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert products: %w", err)
+	}
+
+	// Extract inserted IDs
+	var productIDs []primitive.ObjectID
+	for _, id := range result.InsertedIDs {
+		productIDs = append(productIDs, id.(primitive.ObjectID))
+	}
+
+	fmt.Printf("✅ Products collection created with %d sample records!\n", len(sampleProducts))
+	return productIDs, nil
+}
+
+func initializeUsersForce(ctx context.Context, db *mongo.Database) ([]primitive.ObjectID, error) {
+	collection := db.Collection("users")
+
+	// Insert sample users
+	sampleUsers := GetSampleUsers()
+	result, err := collection.InsertMany(ctx, sampleUsers)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert users: %w", err)
+	}
+
+	// Extract inserted IDs
+	var userIDs []primitive.ObjectID
+	for _, id := range result.InsertedIDs {
+		userIDs = append(userIDs, id.(primitive.ObjectID))
+	}
+
+	fmt.Printf("✅ Users collection created with %d sample records!\n", len(sampleUsers))
+	return userIDs, nil
+}
+
+func initializeSubscriptionsForce(ctx context.Context, db *mongo.Database, userIDs, productIDs []primitive.ObjectID) error {
+	collection := db.Collection("subscriptions")
+
+	// Insert sample subscriptions
+	sampleSubscriptions := GetSampleSubscriptions(userIDs, productIDs)
+	_, err := collection.InsertMany(ctx, sampleSubscriptions)
+	if err != nil {
+		return fmt.Errorf("failed to insert subscriptions: %w", err)
+	}
+
+	fmt.Printf("✅ Subscriptions collection created with %d sample records!\n", len(sampleSubscriptions))
+	return nil
+}
+
 func initializeProducts(ctx context.Context, db *mongo.Database) ([]primitive.ObjectID, error) {
 	collection := db.Collection("products")
 
