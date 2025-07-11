@@ -44,16 +44,16 @@ db-shell:
 
 # API management
 api-run:
-	cd api && go run main.go
+	cd api && go run cmd/api/main.go
 
 api-deps:
 	cd api && go mod tidy
 
 api-init-db:
-	cd api && go run cli/main.go init-db
+	cd api && go run cmd/cli/main.go init-db
 
 api-clean-db:
-	cd api && go run cli/main.go clean-db
+	cd api && go run cmd/cli/main.go clean-db
 
 api-setup:
 	@echo "🔧 Setting up development environment..."
