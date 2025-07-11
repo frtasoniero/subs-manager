@@ -6,28 +6,28 @@ Content-Type: application/json
 ###
 
 ### Get All Subscriptions
-GET http://localhost:8080/subscriptions
+GET http://localhost:8080/api/v1/subscriptions
 Accept: application/json
 Content-Type: application/json
 
 ###
 
 ### Get Subscription by Name - Netflix
-GET http://localhost:8080/subscriptions/Netflix
+GET http://localhost:8080/api/v1/subscriptions/Netflix
 Accept: application/json
 Content-Type: application/json
 
 ###
 
 ### Get Subscription by Name - Spotify
-GET http://localhost:8080/subscriptions/Spotify
+GET http://localhost:8080/api/v1/subscriptions/Spotify
 Accept: application/json
 Content-Type: application/json
 
 ###
 
 ### Get Non-existent Subscription (should return 404)
-GET http://localhost:8080/subscriptions/NonExistent
+GET http://localhost:8080/api/v1/subscriptions/NonExistent
 Accept: application/json
 Content-Type: application/json
 
