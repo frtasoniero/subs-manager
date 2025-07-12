@@ -32,3 +32,41 @@ type SubscriptionWithProduct struct {
 	NextBilling time.Time          `json:"next_billing"`
 	CreatedAt   time.Time          `json:"created_at"`
 }
+
+// IsActive returns true if the subscription is active
+func (s *Subscription) IsActive() bool {
+	return s.Status == "active"
+}
+
+// IsCancelled returns true if the subscription is cancelled
+func (s *Subscription) IsCancelled() bool {
+	return s.Status == "cancelled"
+}
+
+// IsExpired returns true if the subscription is expired
+func (s *Subscription) IsExpired() bool {
+	return s.Status == "expired" || (s.EndDate != nil && s.EndDate.Before(time.Now()))
+}
+
+// Cancel cancels the subscription
+func (s *Subscription) Cancel() {
+	s.Status = "cancelled"
+	now := time.Now()
+	s.EndDate = &now
+	s.UpdatedAt = now
+}
+
+// Renew renews the subscription for another billing cycle
+func (s *Subscription) Renew() {
+	if s.IsActive() {
+		// Add one month to next billing (assuming monthly for simplicity)
+		s.NextBilling = s.NextBilling.AddDate(0, 1, 0)
+		s.UpdatedAt = time.Now()
+	}
+}
+
+// DaysUntilNextBilling returns the number of days until the next billing
+func (s *Subscription) DaysUntilNextBilling() int {
+	duration := s.NextBilling.Sub(time.Now())
+	return int(duration.Hours() / 24)
+}

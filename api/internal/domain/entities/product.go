@@ -17,3 +17,34 @@ type Product struct {
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at" json:"updated_at"`
 }
+
+// IsActive returns true if the product is active
+func (p *Product) IsActive() bool {
+	return p.Status == "active"
+}
+
+// IsMonthly returns true if the product has monthly billing
+func (p *Product) IsMonthly() bool {
+	return p.BillingType == "monthly"
+}
+
+// IsYearly returns true if the product has yearly billing
+func (p *Product) IsYearly() bool {
+	return p.BillingType == "yearly"
+}
+
+// ValidatePrice validates the product price
+func (p *Product) ValidatePrice() bool {
+	return p.Price > 0
+}
+
+// GetMonthlyPrice returns the monthly equivalent price
+func (p *Product) GetMonthlyPrice() float64 {
+	if p.IsMonthly() {
+		return p.Price
+	}
+	if p.IsYearly() {
+		return p.Price / 12
+	}
+	return p.Price // Default to current price
+}
