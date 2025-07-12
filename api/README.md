@@ -12,46 +12,51 @@ This project follows Clean Architecture and SOLID principles to ensure maintaina
 api/
 ├── cmd/
 │   ├── api/
-│   │   └── main.go           # 🚀 API server entry point
+│   │   └── main.go           # ✅ API server entry point
 │   └── cli/
-│       └── main.go           # 🛠️ CLI tools entry point
+│       └── main.go           # ✅ CLI tools entry point
 ├── internal/
 │   ├── config/
-│   │   └── config.go         # ⚙️ Configuration management
+│   │   └── config.go         # ✅ Configuration management
+│   ├── app/
+│   │   ├── app.go            # ✅ Dependency container
+│   │   ├── server.go         # ✅ HTTP server setup
+│   │   └── routes.go         # ✅ Route organization helper
 │   ├── domain/
 │   │   ├── entities/
-│   │   │   ├── user.go       # 👤 User domain entity
-│   │   │   ├── product.go    # 📦 Product domain entity
-│   │   │   └── subscription.go # 💳 Subscription domain entity
+│   │   │   ├── user.go       # ✅ User domain entity
+│   │   │   ├── product.go    # ✅ Product domain entity
+│   │   │   └── subscription.go # ✅ Subscription domain entity
 │   │   └── repositories/
-│   │       ├── user_repository.go         # 👤 User repository interface
-│   │       ├── product_repository.go      # 📦 Product repository interface
-│   │       └── subscription_repository.go # 💳 Subscription repository interface
+│   │       ├── user_repository.go         # ✅ User repository interface
+│   │       ├── product_repository.go      # ✅ Product repository interface
+│   │       └── subscription_repository.go # ✅ Subscription repository interface
 │   ├── infrastructure/
 │   │   ├── database/
-│   │   │   ├── connection.go    # 🔗 Database connection
-│   │   │   ├── migrations.go    # 📋 Database initialization
+│   │   │   ├── connection.go    # ✅ Database connection management
+│   │   │   ├── data.go          # ✅ Sample data functions
+│   │   │   ├── migrations.go    # ✅ Database initialization
 │   │   │   └── repositories/
-│   │   │       ├── mongo_user_repository.go         # 🍃 MongoDB user implementation
-│   │   │       ├── mongo_product_repository.go      # 🍃 MongoDB product implementation
-│   │   │       └── mongo_subscription_repository.go # 🍃 MongoDB subscription implementation
+│   │   │       ├── mongo_user_repository.go         # ❌ MongoDB user implementation
+│   │   │       ├── mongo_product_repository.go      # ❌ MongoDB product implementation
+│   │   │       └── mongo_subscription_repository.go # ✅ MongoDB subscription implementation
 │   │   └── web/
-│   │       ├── router.go        # 🌐 Route definitions
+│   │       ├── router.go        # ✅ Route definitions
 │   │       ├── middleware/
-│   │       │   └── cors.go      # 🔒 CORS middleware
+│   │       │   └── cors.go      # ❌ CORS middleware
 │   │       └── handlers/
-│   │           ├── user_handler.go         # 👤 User HTTP handlers
-│   │           ├── product_handler.go      # 📦 Product HTTP handlers
-│   │           └── subscription_handler.go # 💳 Subscription HTTP handlers
+│   │           ├── user_handler.go         # ❌ User HTTP handlers
+│   │           ├── product_handler.go      # ❌ Product HTTP handlers
+│   │           └── subscription_handler.go # ✅ Subscription HTTP handlers
 │   └── usecases/
-│       ├── user_usecase.go         # 👤 User business logic
-│       ├── product_usecase.go      # 📦 Product business logic
-│       └── subscription_usecase.go # 💳 Subscription business logic
+│       ├── user_usecase.go         # ✅ User business logic
+│       ├── product_usecase.go      # ✅ Product business logic
+│       └── subscription_usecase.go # ✅ Subscription business logic
 ├── pkg/
 │   ├── errors/
 │   │   └── errors.go           # ❌ Custom error types
 │   └── utils/
-│       └── response.go         # 📤 HTTP response helpers
+│       └── response.go         # ✅ HTTP response helpers
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -73,7 +78,13 @@ api/
    cd subs-manager
    ```
 
-2. **Start the environment**
+2. **Configure environment (optional)**
+   ```bash
+   cp api/.env.example api/.env
+   # Edit .env file with your preferred settings
+   ```
+
+3. **Start the environment**
    ```bash
    make api-setup
    ```
@@ -226,17 +237,23 @@ curl -X GET http://localhost:8080/api/v1/subscriptions
 
 ## 🔧 Configuration
 
-The API uses environment variables for configuration:
+The API uses environment variables for configuration. Copy `.env.example` to `.env` and modify as needed:
 
 ```bash
-# Database
+# Database Configuration
 MONGO_URI=mongodb://root:password@localhost:27017
 MONGO_DB_NAME=subs-db
+MONGO_TIMEOUT=10s
 
-# Server
-PORT=8080
-GIN_MODE=release
+# Server Configuration
+SERVER_PORT=8080
 ```
+
+**Configuration Features:**
+- 🔧 **Environment-based**: Uses environment variables with sensible defaults
+- 📝 **Type-safe**: Properly typed configuration with validation
+- 🔄 **Flexible**: Easy to override for different environments
+- 📋 **Documentation**: Complete `.env.example` file provided
 
 ## 🤝 Contributing
 
