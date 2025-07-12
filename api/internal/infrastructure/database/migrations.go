@@ -7,34 +7,21 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // InitializeDatabase creates the database and populates it with initial data
-func InitializeDatabase() error {
-	// MongoDB connection string
-	uri := "mongodb://root:password@localhost:27017"
-
-	// Create client
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+func InitializeDatabase(config Config) error {
+	// Create client and database connection
+	client, db, err := NewConnection(config)
 	if err != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %w", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer client.Disconnect(context.TODO())
+	defer Close(client)
 
-	// Test connection
+	// Initialize collections in order (products, users, then subscriptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed to ping MongoDB: %w", err)
-	}
-
-	// Create database
-	db := client.Database("subs-db")
-
-	// Initialize collections in order (products, users, then subscriptions)
 	productIDs, err := initializeProducts(ctx, db)
 	if err != nil {
 		return err
@@ -54,28 +41,20 @@ func InitializeDatabase() error {
 }
 
 // CleanDatabase removes all data from collections and reinitializes with default data
-func CleanDatabase() error {
-	// MongoDB connection string
-	uri := "mongodb://root:password@localhost:27017"
-
-	// Create client
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+func CleanDatabase(config Config) error {
+	// Create client and database connection
+	client, db, err := NewConnection(config)
 	if err != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %w", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer client.Disconnect(context.TODO())
+	defer Close(client)
 
-	// Test connection
+	// Clean all collections
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed to ping MongoDB: %w", err)
-	}
-
 	// Get database
-	db := client.Database("subs-db")
+	// db is already available from NewConnection
 
 	// Clean all collections
 	fmt.Println("🧹 Cleaning database...")
