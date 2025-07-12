@@ -67,6 +67,6 @@ func (s *Subscription) Renew() {
 
 // DaysUntilNextBilling returns the number of days until the next billing
 func (s *Subscription) DaysUntilNextBilling() int {
-	duration := s.NextBilling.Sub(time.Now())
+	duration := time.Until(s.NextBilling)
 	return int(duration.Hours() / 24)
 }

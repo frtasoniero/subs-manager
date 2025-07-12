@@ -21,7 +21,7 @@ api/
 │   ├── app/
 │   │   ├── app.go            # ✅ Dependency container
 │   │   ├── server.go         # ✅ HTTP server setup
-│   │   └── routes.go         # ✅ Route organization helper
+│   │   └── routes.go         # ❌ Route organization helper
 │   ├── domain/
 │   │   ├── entities/
 │   │   │   ├── user.go       # ✅ User domain entity
