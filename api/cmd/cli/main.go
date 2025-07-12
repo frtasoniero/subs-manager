@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/frtasoniero/subsmanager/internal/config"
 	"github.com/frtasoniero/subsmanager/internal/infrastructure/database"
 )
 
@@ -19,17 +20,25 @@ func main() {
 
 	command := os.Args[1]
 
+	// Load configuration
+	cfg := config.Load()
+	dbConfig := database.Config{
+		URI:      cfg.Database.URI,
+		Database: cfg.Database.Name,
+		Timeout:  cfg.Database.Timeout,
+	}
+
 	switch command {
 	case "init-db":
 		fmt.Println("🚀 Initializing MongoDB database...")
-		if err := database.InitializeDatabase(); err != nil {
+		if err := database.InitializeDatabase(dbConfig); err != nil {
 			log.Fatal("Failed to initialize database:", err)
 		}
 		fmt.Println("✅ Database initialized successfully!")
 
 	case "clean-db":
 		fmt.Println("🧹 Cleaning and resetting MongoDB database...")
-		if err := database.CleanDatabase(); err != nil {
+		if err := database.CleanDatabase(dbConfig); err != nil {
 			log.Fatal("Failed to clean database:", err)
 		}
 		fmt.Println("✅ Database cleaned and reset successfully!")
